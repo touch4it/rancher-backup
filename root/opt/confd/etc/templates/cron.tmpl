@@ -1,0 +1,4 @@
+#!/usr/bin/with-contenv bash
+
+# Lauch as root to avoid access issue
+exec su root -c "/usr/local/bin/go-cron \"{{ getv "/cron/schedule" "0 0 0 * * *"}}\" /bin/bash -c \"cd ${APP_HOME} && python ${APP_HOME}/backup.py\""

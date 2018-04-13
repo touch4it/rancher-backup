@@ -1,0 +1,2 @@
+/opt/backup/config true backup  0660 0770
+/opt/backup/.gnupg true backup 0600 0700

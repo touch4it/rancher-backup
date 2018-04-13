@@ -1,0 +1,5 @@
+pyyaml
+Jinja2
+mock
+cattle
+nose
