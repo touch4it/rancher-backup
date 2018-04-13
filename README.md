@@ -1,3 +1,6 @@
+# Auto-deploy
+This repo is linked to touch4it Docker Hub - https://hub.docker.com/r/touch4it/rancher-backup/
+
 # rancher-backup
 
 It's a general purpose to solve backup matter on Rancher.
@@ -50,7 +53,7 @@ It's mean that if you should backup MySQL database, you need to set label `backu
 Confd settings:
 - **CONFD_PREFIX_KEY**: The prefix key use by Confd. Default is `/backup`
 - **CONFD_BACKEND**: The backend used by Confd. Default is `env`
-- **CONFD_NODES**: The nodes to use to access on backend. Defaukt is empty. 
+- **CONFD_NODES**: The nodes to use to access on backend. Defaukt is empty.
 
 The following options permit to set the backup policy :
 - **BACKUP_CRON_schedule**: when you should start backup. For example, to start backup each day set `0 0 0 * * *`. Default is `0 0 0 * * *`
