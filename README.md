@@ -60,6 +60,7 @@ The following options permit to set the backup policy :
 - **BACKUP_MODULE_database**: Allow to auto discover service and perform dump (when Know) before start backup with Duplicity. Default is `true`.
 - **BACKUP_MODULE_stack**: Allow to perform export of each stack before start backup with Duplicity. Default is `true`.
 - **BACKUP_MODULE_rancher-db**: Allow to perform a dump of Rancher database befaire start backup with Duplicity. Default is `true`.
+- **BACKUP_DUPLICITY_enable**: `true` or `false`.
 - **BACKUP_DUPLICITY_source-path**: The path to backup with Duplicity. Default is `/backup`.
 - **BACKUP_DUPLICITY_target-path**: The path were store backup on remote backend. The default value is `/`.
 - **BACKUP_DUPLICITY_url**: this is the target URL to externalize the backup. For example, to use FTP as external backup set `ftp://login@my-ftp.com` and add environment variable `FTP_PASSWORD`. For Amazon S3, set `s3://host[:port]/bucket_name[/prefix]`. Read the ducplicity man for [all supported backend](http://duplicity.nongnu.org/duplicity.1.html#sect7). There are no default value.

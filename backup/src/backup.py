@@ -17,10 +17,10 @@ def checkParameters(settings):
     :param settings: The list of settings
     :type settings: dict
     """
-    
+
     if isinstance(settings, dict) is False:
         raise KeyError("Settings must be provided")
-    
+
     if 'module' not in settings:
         raise KeyError("You must provide module section on your config file")
     if 'databases' not in settings['module'] or isinstance(settings['module']['databases'], bool) is False:
@@ -40,7 +40,7 @@ def checkParameters(settings):
             raise KeyError("rancher.api.key must be provided")
         if 'secret' not in settings['rancher']['api'] or settings['rancher']['api']['secret'] is None or settings['rancher']['api']['secret'] == "":
             raise KeyError("rancher.api.secret must be provided")
-    
+
     if 'duplicity' not in settings:
         raise KeyError("You must provide duplicity section on your config file")
     if 'source-path' not in settings['duplicity'] or settings['duplicity']['source-path'] is None or settings['duplicity']['source-path'] == "":
@@ -57,7 +57,7 @@ def checkParameters(settings):
         raise KeyError("duplicity.remove-all-inc-of-but-n-full must be provided")
     if 'volsize' not in settings['duplicity'] or isinstance(settings['duplicity']['volsize'], int) is False :
         raise KeyError("duplicity.volsize must be provided")
-        
+
 def checkAndGetDatabaseSettings(settings, rancherDatabaseSettings):
     """
     Permit to check that all parameter is setted to dump Rancher database is needed
@@ -67,13 +67,13 @@ def checkAndGetDatabaseSettings(settings, rancherDatabaseSettings):
     :type settings: dict
     :type rancherDatabaseSettings: dict
     """
-    
+
     if isinstance(settings, dict) is False:
         raise KeyError("You must provide settings")
     if isinstance(rancherDatabaseSettings, dict) is False:
         raise KeyError("You must provide databaseSettings")
-    
-    
+
+
     if settings['module']['rancher-db'] is True:
         if 'host' not in rancherDatabaseSettings or 'db' not in rancherDatabaseSettings or 'port' not in rancherDatabaseSettings or 'password' not in rancherDatabaseSettings or 'user' not in rancherDatabaseSettings:
             logger.info("Can't grab Rancher database settings from API, try to grab it from config file")
@@ -102,23 +102,23 @@ def checkAndGetDatabaseSettings(settings, rancherDatabaseSettings):
                 raise KeyError("rancher.db.port must be provided")
             else:
                 rancherDatabaseSettings['port'] = settings['rancher']['db']['port']
-            
+
             return rancherDatabaseSettings
     else:
         return None
-    
-    
-    
+
+
+
 def getAndcheckAllParameters():
     configService = Config()
     settings = configService.getSettings()
-    
+
     try:
         checkParameters(settings)
     except KeyError as e:
         raise Exception("Somthing wrong on your config file: %s" % e.message)
 
-    
+
     logger.info("Rancher URL: %s", settings['rancher']['api']['url'][:-2] + "v2-beta")
     logger.info("Rancher key: %s", settings['rancher']['api']['key'])
     logger.info("Rancher secret: XXXX")
@@ -130,29 +130,29 @@ def getAndcheckAllParameters():
     logger.info("Backup incremental chain to keep: %s", settings['duplicity']['remove-all-inc-of-but-n-full'])
     logger.info("Volume size: %s", settings['duplicity']['volsize'])
     logger.info("Backup options: %s", settings['duplicity']['options'])
-    
+
     # Init services
     try:
         rancherService = Rancher(settings['rancher']['api']['url'][:-2] + "v2-beta", settings['rancher']['api']['key'], settings['rancher']['api']['secret'])
     except Exception as e:
         raise Exception("Can't connect to rancher API : %s \n%s" %  (e.message, traceback.format_exc()))
-    
+
     try:
         rancherDatabaseSettings = rancherService.getDatabaseSettings()
     except Exception as e:
         rancherDatabaseSettings = {}
         pass
-    
+
     # Check database settings
     try:
         rancherDatabaseSettings = checkAndGetDatabaseSettings(settings, rancherDatabaseSettings)
     except KeyError as e:
         raise Exception("You must set the Rancher database settings on config file to dump it: %s" % e.message)
-    
-    
-    
+
+
+
     return (settings, rancherDatabaseSettings)
-    
+
 
 
 if __name__ == '__main__':
@@ -179,19 +179,19 @@ if __name__ == '__main__':
     file_handler.setLevel(loglevel)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
-    
+
     # Load and check settings
     configService = Config("config")
-    
+
     # Just check parameters
     if len(sys.argv) > 1 and sys.argv[1] == "--checkParameters":
-        
+
         try:
             getAndcheckAllParameters()
         except Exception as e:
             logger.error("Error - %s", e.message)
             sys.exit(1)
-    
+
     # Run backup
     else:
 
@@ -204,18 +204,20 @@ if __name__ == '__main__':
         backupService = Backup()
         rancherService = Rancher()
         backend = "%s%s" % (settings['duplicity']['url'], settings['duplicity']['target-path'])
-    
+
         try:
             # We init duplicity
-            try:
-                logger.info("Start to initialize Duplicity...")
-                backupService.initDuplicity(settings['duplicity']['source-path'], backend)
-                logger.info("Duplicity initialization is finished.")
-            except Exception as e:
-                logger.info("No backup found (probably the first) or already initialized")
-                pass
-    
-    
+            if settings['duplicity']['enable'] == "true":
+                try:
+                    logger.info("Start to initialize Duplicity...")
+                    backupService.initDuplicity(settings['duplicity']['source-path'], backend)
+                    logger.info("Duplicity initialization is finished.")
+                except Exception as e:
+                    logger.info("No backup found (probably the first) or already initialized")
+                    pass
+            else
+                logger.info("Duplicity disabled...")
+
             # We dump the databases services if needed
             if settings['module']['databases'] is True:
                 logger.info("Start to dump databases...")
@@ -223,27 +225,27 @@ if __name__ == '__main__':
                 listDump = backupService.searchDump(settings['duplicity']['source-path'] + '/dump', listServices)
                 backupService.runDump(listDump)
                 logger.info("The dumping databases is finished.")
-    
+
             # We dump the rancher stack settings if needed
             if settings['module']['stack'] is True:
                 logger.info("Start to export stack as json...")
                 listStacks = rancherService.getStacks()
                 backupService.dumpStacksSettings(settings['duplicity']['source-path'] + '/rancher', listStacks)
                 logger.info("The exporting of stack if finished")
-               
-            
+
+
             # We dump the rancher database if needed
             if settings['module']['rancher-db'] is True:
                 logger.info("Start to dump Rancher database...")
                 backupService.dumpRancherDatabase(settings['duplicity']['source-path'] + '/rancher', rancherDatabaseSettings)
                 logger.info("The Rancher database dumping is finished.")
-    
+
             # We run the backup
             logger.info("Start to externalize the backup with Duplicity...")
             backupService.runDuplicity(settings['duplicity']['source-path'], backend, settings['duplicity']['full-if-older-than'], settings['duplicity']['remove-all-but-n-full'], settings['duplicity']['remove-all-inc-of-but-n-full'], settings['duplicity']['volsize'], settings['duplicity']['options'], settings['duplicity']['encrypt-key'])
             logger.info("The backup exporing is finished.")
-    
-    
+
+
         except Exception as e:
             logger.error("Unattented error occur : %s", e.message)
             logger.error(traceback.format_exc())
