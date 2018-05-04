@@ -207,7 +207,7 @@ if __name__ == '__main__':
 
         try:
             # We init duplicity
-            if settings['duplicity']['enable'] == "true":
+            if os.getenv("BACKUP_DUPLICITY_enable") == "true":
                 try:
                     logger.info("Start to initialize Duplicity...")
                     backupService.initDuplicity(settings['duplicity']['source-path'], backend)
