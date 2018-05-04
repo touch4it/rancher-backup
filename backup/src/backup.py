@@ -215,7 +215,7 @@ if __name__ == '__main__':
                 except Exception as e:
                     logger.info("No backup found (probably the first) or already initialized")
                     pass
-            else
+            else:
                 logger.info("Duplicity disabled...")
 
             # We dump the databases services if needed
