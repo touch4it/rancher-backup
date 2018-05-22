@@ -241,9 +241,10 @@ if __name__ == '__main__':
                 logger.info("The Rancher database dumping is finished.")
 
             # We run the backup
-            logger.info("Start to externalize the backup with Duplicity...")
-            backupService.runDuplicity(settings['duplicity']['source-path'], backend, settings['duplicity']['full-if-older-than'], settings['duplicity']['remove-all-but-n-full'], settings['duplicity']['remove-all-inc-of-but-n-full'], settings['duplicity']['volsize'], settings['duplicity']['options'], settings['duplicity']['encrypt-key'])
-            logger.info("The backup exporing is finished.")
+            if os.getenv("BACKUP_DUPLICITY_enable") == "true":
+                logger.info("Start to externalize the backup with Duplicity...")
+                backupService.runDuplicity(settings['duplicity']['source-path'], backend, settings['duplicity']['full-if-older-than'], settings['duplicity']['remove-all-but-n-full'], settings['duplicity']['remove-all-inc-of-but-n-full'], settings['duplicity']['volsize'], settings['duplicity']['options'], settings['duplicity']['encrypt-key'])
+                logger.info("The backup exporing is finished.")
 
 
         except Exception as e:
