@@ -2,19 +2,19 @@ image: "postgres:latest"
 commands:
   {% if env.POSTGRES_USER and env.POSTGRES_DB %}
   {# When user, password and database setted  #}
-  - "pg_dump -h {{ ip }} -U {{ env.POSTGRES_USER }} -d {{ env.POSTGRES_DB }} -f {{ target_dir }}/{{ env.POSTGRES_DB }}.dump"
+  - "pg_dump -h {{ ip }} -U {{ env.POSTGRES_USER }} -d {{ env.POSTGRES_DB }} > {{ target_dir }}/{{ env.POSTGRES_DB }}.dump"
 
   {% elif env.POSTGRES_USER and not env.POSTGRES_DB %}
   {# When user, password setted  #}
-  - "pg_dump -h {{ ip }} -U {{ env.POSTGRES_USER }} -d {{ env.POSTGRES_USER }} -f {{ target_dir }}/{{ env.POSTGRES_USER }}.dump"
+  - "pg_dump -h {{ ip }} -U {{ env.POSTGRES_USER }} -d {{ env.POSTGRES_USER }} > {{ target_dir }}/{{ env.POSTGRES_USER }}.dump"
 
   {% elif not env.POSTGRES_USER and env.POSTGRES_DB %}
   {# When database setted, password #}
-  - "pg_dump -h {{ ip }} -U postgres -d {{ env.POSTGRES_DB }} -f {{ target_dir }}/{{ env.POSTGRES_DB }}.dump"
+  - "pg_dump -h {{ ip }} -U postgres -d {{ env.POSTGRES_DB }} > {{ target_dir }}/{{ env.POSTGRES_DB }}.dump"
 
   {% elif not env.POSTGRES_USER and not env.POSTGRES_DB %}
   {# When just root setted #}
-  - "pg_dumpall -h {{ ip }} -U postgres --clean -f {{ target_dir }}/all-databases.dump"
+  - "pg_dumpall -h {{ ip }} -U postgres --clean > {{ target_dir }}/all-databases.dump"
 
   {% endif %}
 
